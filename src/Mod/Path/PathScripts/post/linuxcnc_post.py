@@ -54,6 +54,7 @@ parser.add_argument('--postamble', help='set commands to be issued after the las
 parser.add_argument('--inches', action='store_true', help='Convert output for US imperial mode (G20)')
 parser.add_argument('--modal', action='store_true', help='Output the Same G-command Name USE NonModal Mode')
 parser.add_argument('--axis-modal', action='store_true', help='Output the Same Axis Value Mode')
+parser.add_argument('--tool-length-compensation', action='store_true', help='Automatically issue G43 after M6')
 
 TOOLTIP_ARGS = parser.format_help()
 
@@ -66,6 +67,7 @@ MODAL = False  # if true commands are suppressed if the same as previous line.
 OUTPUT_DOUBLES = True  # if false duplicate axis values are suppressed if the same as previous line.
 COMMAND_SPACE = " "
 LINENR = 100  # line number starting value
+OUTPUT_TLO = False # whether to output G43 after toolchange
 
 # These globals will be reflected in the Machine configuration of the project
 UNITS = "G21"  # G21 for metric, G20 for us standard
@@ -114,7 +116,8 @@ def processArguments(argstring):
     global UNIT_FORMAT
     global MODAL
     global OUTPUT_DOUBLES
-
+    global OUTPUT_TLO
+    
     try:
         args = parser.parse_args(shlex.split(argstring))
         if args.no_header:
@@ -141,7 +144,9 @@ def processArguments(argstring):
         if args.axis_modal:
             print ('here')
             OUTPUT_DOUBLES = False
-
+        if args.tool_length_compensation:
+            OUTPUT_TLO = True
+            
     except:
         return False
 
@@ -252,7 +257,8 @@ def parse(pathobj):
     global OUTPUT_DOUBLES
     global UNIT_FORMAT
     global UNIT_SPEED_FORMAT
-
+    global OUTPUT_TLO
+    
     out = ""
     lastcommand = None
     precision_string = '.' + str(PRECISION) + 'f'
@@ -329,6 +335,8 @@ def parse(pathobj):
                 #     out += linenumber() + "(begin toolchange)\n"
                 for line in TOOL_CHANGE.splitlines(True):
                     out += linenumber() + line
+                if OUTPUT_TLO:
+                    outstring.append('G43')
 
             if command == "message":
                 if OUTPUT_COMMENTS is False:
