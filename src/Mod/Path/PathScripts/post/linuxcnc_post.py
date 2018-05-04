@@ -171,9 +171,24 @@ def export(objectslist, filename, argstring):
     # write header
     if OUTPUT_HEADER:
         gcode += linenumber() + "(Exported by FreeCAD)\n"
+        gcode += linenumber() + "(Source: " +  FreeCAD.ActiveDocument.FileName + ")\n"
         gcode += linenumber() + "(Post Processor: " + __name__ + ")\n"
         gcode += linenumber() + "(Output Time:" + str(now) + ")\n"
 
+        job = PathUtils.findParentJob(objectslist[0])
+        
+        if hasattr(job, "Description"):
+            for line in job.Description.splitlines(False):
+                gcode += linenumber() + "(" + line + ")\n"
+
+        if hasattr(job, "ToolController"):
+            gcode += "(begin tooltable)\n"
+            for tool in job.ToolController:
+                gcode += "(%3d: %s %5d %7s %5d %5d %5d %5d)\n" % \
+                  (tool.ToolNumber, tool.Tool, tool.SpindleSpeed, tool.SpindleDir,
+                   tool.VertFeed, tool.HorizFeed, tool.VertRapid, tool.HorizRapid)
+            gcode += "(end tooltable)\n"
+                  
     # Write the preamble
     if OUTPUT_COMMENTS:
         gcode += linenumber() + "(begin preamble)\n"
