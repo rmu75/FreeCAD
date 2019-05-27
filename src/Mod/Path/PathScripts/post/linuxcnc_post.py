@@ -172,7 +172,7 @@ def export(objectslist, filename, argstring):
     # write header
     if OUTPUT_HEADER:
         gcode += linenumber() + "(Exported by FreeCAD)\n"
-        gcode += linenumber() + "(Source: '" +  FreeCAD.ActiveDocument.FileName + "')\n"
+        gcode += linenumber() + "(Source: " +  FreeCAD.ActiveDocument.FileName + ")\n"
         gcode += linenumber() + "(Post Processor: " + __name__ + ")\n"
         gcode += linenumber() + "(Output Time: " + str(now) + ")\n"
 
@@ -185,8 +185,8 @@ def export(objectslist, filename, argstring):
         if hasattr(job, "ToolController"):
             gcode += "(begin tooltable)\n"
             for tool in job.ToolController:
-                gcode += "(%3d: %-40s %5.2f %5d %7s %5d %5d %5d %5d)\n" % \
-                        (tool.ToolNumber, tool.Tool.Name[:40], tool.Tool.Diameter, tool.SpindleSpeed, tool.SpindleDir,
+                gcode += "(%3d: %s %5d %7s %5d %5d %5d %5d)\n" % \
+                  (tool.ToolNumber, tool.Tool, tool.SpindleSpeed, tool.SpindleDir,
                    tool.VertFeed, tool.HorizFeed, tool.VertRapid, tool.HorizRapid)
             gcode += "(end tooltable)\n"
                   
